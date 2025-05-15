@@ -1,2 +1,1 @@
-# pi-estimator
-Pi estimator based on the Monte Carlo method
+# Estimating Pi with the Monte Carlo method
