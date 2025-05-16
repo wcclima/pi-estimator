@@ -6,11 +6,43 @@ This is a simple, popular application of the Monte Carlo method to estimate the 
 
 The modulo `pi_estimator` produces a estimate for the value of the constant $\pi$, as well as animations of how the estimation evolves as the number of samples used in the method increases and a depiction of the sampling.
 
-## 2 - Repo structure
+
+
+## 2 - Repo organisation
+
+**`pi_estimator/`: The $\pi$ estimator modules**
+It contains the $\pi$ estimator module. See also Module architecture below.
+
+**`pictures/:` Pictures produced by the module**
+- `EstimationPi.gif`
+- `MonteCarloPi.gif` 
+
 
 ## 3 - Module architecture
 
+Description of the `pi_estimator` module architecture.
+
+- `pi_estimator/__init__.py`
+  - Initialises the module
+  - Imports the PiEstmator class
+  
+- `pi_estimator/pi_estimator.py`: defines the `PiEstimator` class with the methods
+  - `estimate`;
+  - `plot_estimation`; 
+  - `animate_sampling`;
+  - `results`.
+  
 ## 4 - Features
+
+- The `PiEstimator` class:
+  - estimates the value of the mathematical constant $\pi$ using the Monte Carlo method;
+  - plots and animates the evolution of the estimation as the number of samples increases;
+  - animates the sampling and the evolution of the normal distribution for the estimation;
+  - has the following methods:
+    - `estimate` performes the estimation,
+    - `plot_estimation` plots the estimation versus the number of samples,
+    - `animate_sampling` animates the sampling,
+    - `results` returns the final estimation and the confidence interval at 95% confidence level.
 
 ## 5 - The Monte Carlo method
 
@@ -28,7 +60,8 @@ $$
 \hat{\pi} = A_{\rm square}\times \hat{p}.
 $$
 
-
 ## 6 - Results
+
+![plot](https://github.com/wcclima/pi-estimator/blob/main/pictures/EstimationPi.gif)
 
 ## 7 - Bibliography
