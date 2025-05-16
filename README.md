@@ -4,7 +4,7 @@
 
 This is a simple, popular application of the Monte Carlo method to estimate the value of the mathematical constant $\pi$. It is purely pedagogical in purpose and serves as a visual aid to see the method in action.
 
-The modulo `pi_estimator` produces a estimate for the value of the constant $\pi$, as well as animations of how the estimation evolves as the number of samples used in the method increases and a depiction of the sampling.
+The modulo `pi_estimator` generates an estimate for the value of the constant $\pi$, as well as animations of how the estimation evolves as the number of samples used in the method increases and of the sampling procedure.
 
 
 
@@ -14,8 +14,8 @@ The modulo `pi_estimator` produces a estimate for the value of the constant $\pi
 It contains the $\pi$ estimator module. See also Module architecture below.
 
 **`pictures/:` Pictures produced by the module**
-- `EstimationPi.gif`
-- `MonteCarloPi.gif` 
+- `EstimationPi2D.gif`
+- `MonteCarloPi2D.gif` 
 
 
 ## 3 - Module architecture
@@ -46,9 +46,11 @@ Description of the `pi_estimator` module architecture.
 
 ## 5 - The Monte Carlo method
 
-The Monte Carlo method is a statistical method employed in may fields to perform simulations. In summary, the idea of the method is that we have a quantity of interest that can be expressed as a parameter characterizing some statistical population. The method works then to creating artificial samples of that population and using the sample to estimate that parameter.
+The Monte Carlo method is a popular statistical tool employed in may fields to perform simulations. In summary, the idea of the method is that we have a quantity of interest that can be expressed as a parameter characterizing some statistical population. The method works then creating artificial samples of that population and using the sample to estimate the parameter.
 
-The estimation of $\pi$ is a fun application of the Monte Carlo method, as it provides a very visual and intuitive way to see it in action. The constant $\pi$ has a very direct geometrical interpretation: it is the area of a circle with radius 1. Let us consider, then, the circle of radius 1 inscribed in a square of side 2. Taking our statistical population as the points inside the square, the area of the inscribed circle is proportional to $p$, the fraction of points inside the circle. Hence, in this case, finding a estimative for $\pi$ is equivalent to finding an estimative $\hat{p}$ for the populational proportion of the points inside the circle. Producing samples to that popuplation becomes as easy as randomly throwing imaginary darts to a board, and the estimative for the population propotion is simply given by
+The estimation of $\pi$ is a fun application of the Monte Carlo method, as it provides a very visual and intuitive way to see it in action. The reason is that the constant $\pi$ has a very direct geometrical interpretation: it is the area of a circle with radius 1. Thus, consider the circle of radius 1 inscribed in a square of side 2. Taking our statistical population as the points inside the square, the area of the inscribed circle is proportional to $p$, the fraction of points inside the circle. Hence, in this case, finding a estimative for $\pi$ is equivalent to finding an estimative $\hat{p}$ for the populational proportion of the points inside the circle. 
+
+Producing samples to that popuplation then becomes as easy as randomly throwing independent imaginary darts to a board, hitting the board at points $P = (x, y)$. The coordinates $x,\ y$ are independent, uniformely distributuded random variables in the range $[-1, 1]$ (as the center of the circle is at the origin). The darts hit the circle when they land at points satisfying $x^2 + y^2 \le 1$. The estimative for the population propotion is then simply given by
 
 $$
 \hat{p} = \frac{\text{number of throws in the circle}}{\text{number of throws}}.
@@ -62,10 +64,63 @@ $$
 
 ## 6 - Results
 
+Here we present estimations of $\pi$ in 2- and 3-dimensional spaces, so we can compare the convergence of the estimative.
+
  - **2-d Simulation**
+
+<div align="center">
+  
+|       quantity      |     value      |
+|:-------------------:|:--------------:|
+|      dimension      |       2        |
+|       samples       |      6000      |
+|          π          |     3.132      |
+| conf. interval @95% | [3.119, 3.145] |
+
+</div>
+<br><br>
+
+<div align="center">
+
+![plot](https://github.com/wcclima/pi-estimator/blob/main/pictures/EstimationPi2D.gif)
+  
+*Figure 1: Estimative for Pi in 2-d using a total of 6000 samples.*
+
+</div>
+<br><br>
+
+![plot](https://github.com/wcclima/pi-estimator/blob/main/pictures/MonteCarloPi2D.gif)
+<div align="center">
+  
+*Figure 2: (On the left) Sampling of points within a square of side 2 with a inscribe circle of radius 1. (On the right) Normal distribution for the estimative and the corresponding confidence interval at 95% confidence level.*
+
+</div>
+<br><br>
 
 
 - **3-d Simulation**
+
+<div align="center">
+  
+|       quantity      |     value     |
+|:-------------------:|:-------------:|
+|      dimension      |       3       |
+|       samples       |      6000     |
+|          π          |     3.123     |
+| conf. interval @95% | [3.11, 3.136] |
+
+</div>
+<br><br>
+
+
+<div align="center">
+  
+![plot](https://github.com/wcclima/pi-estimator/blob/main/pictures/EstimationPi3D.gif)
+  
+*Figure 3: Estimative for Pi in 3-d using a total of 6000 samples.*
+
+</div>
+<br><br>
 
 
 ## 7 - Bibliography
