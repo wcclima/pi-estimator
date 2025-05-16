@@ -8,13 +8,13 @@ from scipy.stats import norm
 from math import factorial
 from prettytable import PrettyTable
 
-__all__ = ["EstimatePi"]
+__all__ = ["PiEstimator"]
 
-class EstimatePi(object):
+class PiEstimator(object):
     """
     Estimates the value of the number Pi using the Monte Carlo method.
 
-    EstimatePi computes the number Pi by sampling points in n-dimensional
+    PiEstimator computes the number Pi by sampling points in n-dimensional
     Euclidean space and using them to estimate the volume of n-sphere of
     radius 1.
 
@@ -105,7 +105,7 @@ class EstimatePi(object):
         plot.set_data(np.linspace(1,step,step), data[:step])
 
     
-    def _animate_sampling(self, frame, suptitle, x, ax, data_scatter, dist_plot, scatter_plot, shade_plot):
+    def _animate_sampling(self, frame, suptitle, x, ax, dist_plot, scatter_plot, shade_plot):
         """
         Animation update function for visualizing sampling and distribution estimation.
 
