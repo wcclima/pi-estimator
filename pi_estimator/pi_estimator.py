@@ -86,23 +86,25 @@ class PiEstimator(object):
         return i
     
 
-    def _animate_estimate(self, step, plot, data):
+    def _animate_estimate(
+            self, 
+            frame, 
+            plot
+            ):
         """
-        Animation update function for visualizing the estimation plot at each step.
+        Animation update function for visualizing the estimation plot at each frame.
 
         Keyword arguments:
-            step (int):
-                The step currently being updated.
+            frame (int):
+                The frame currently being updated.
 
             plot: list of matplotlib.lines.Line2D
                  A list of Line2D objects (as returned by `ax.plot(...)`) 
                  to be updated in each animation frame.
 
-            data: array-like of shape (n_samples, 2)
-                The data used to updated the plot at the current step.
         """
 
-        plot.set_data(np.linspace(1,step,step), data[:step])
+        plot.set_data(np.linspace(1, frame, frame), self.pi[:frame])
 
     
     def _animate_sampling(self, frame, suptitle, x, ax, dist_plot, scatter_plot, shade_plot):
@@ -141,11 +143,11 @@ class PiEstimator(object):
         """
 
         suptitle.set_text(f"{frame} throws")
-        scatter_plot = sns.scatterplot(x = self.samples[frame - 1:frame,0], y = self.samples[frame - 1:frame,1], 
-                        hue = self.samples[frame - 1:frame,2], style = self.samples[frame - 1:frame,2], 
+        scatter_plot = sns.scatterplot(x = self.samples[:frame,0], y = self.samples[:frame,1], 
+                        hue = self.samples[:frame,2], style = self.samples[:frame,2], 
                         color = ['green', 'red'], legend = False, 
                         palette = {True: 'green', False: 'red'}, 
-                        markers = {True: 'o', False: 'X'}, s = 35, 
+                        markers = {True: 'o', False: 'o'}, s = 20, 
                         linewidth=0.1, ax = ax
                     )
         
@@ -163,6 +165,49 @@ class PiEstimator(object):
             [new_xmin, 0.]
         ]
         shade_plot.set_xy(new_vertices)
+
+
+    def _frames(self):
+        """
+        Generate a list of frame indices for use in matplotlib.animation.FuncAnimation.
+
+        This method determines which sample indices should be used as frames in the animation,
+        based on the total number of samples (`self.n_samples`). It adapts the frame frequency 
+        according to the sample size.
+
+        Returns:
+            list[int]: A list of integer frame indices to be used for animation.
+        
+        Frame selection logic:
+            - For n_samples ≤ 100: include all frames starting from 2.
+            - For 100 < n_samples ≤ 1000: include all from 2 to 99, then every 25th sample.
+            - For 1000 < n_samples ≤ 10000: include early frames densely (2–99), 
+            then every 25th up to 1000, and every 50th up to n_samples.
+            - For n_samples > 10000: similar strategy, with added every 100th frame beyond 10000.
+
+        """
+        
+        if self.n_samples <= 100:
+            frame_list = [i for i in range(2, self.n_samples)]
+            
+        elif (self.n_samples > 100)&(self.n_samples <= 1000):
+            frame_list = [i for i in range(2, 100)]
+            frame_list += [i for i in range(100, self.n_samples, 25)]
+
+        elif (self.n_samples > 1000)&(self.n_samples <= 10000):
+            frame_list = [i for i in range(2, 100)]
+            frame_list += [i for i in range(100, 1000, 25)]
+            frame_list += [i for i in range(1000, self.n_samples, 50)]
+
+        elif (self.n_samples > 10000):
+            frame_list = [i for i in range(2, 100)]
+            frame_list += [i for i in range(100, 1000, 25)]
+            frame_list += [i for i in range(1000, 10000, 50)]
+            frame_list += [i for i in range(10000, self.n_samples, 100)]
+
+        return frame_list
+
+
 
 
     def estimate(self, n_samples, n_dimensions = 2):
@@ -244,7 +289,7 @@ class PiEstimator(object):
 
 
 
-    def plot_estimation(self, save_as_animation = False):
+    def plot_estimation(self, save_as_animation = False, file_name = 'EstimationPi.gif'):
         """
         Visualize the convergence of the Monte Carlo estimate of Pi with respect to sample size.
 
@@ -256,6 +301,9 @@ class PiEstimator(object):
         save_as_animation (bool, default=False):
             If True, generates and saves an animated GIF named 'EstimationPi.gif' that shows the evolution of the π estimate
             over increasing sample sizes. If False, a static plot is shown instead.
+
+        file_name (str, default = 'EstimationPi.gif'):
+            The name of the exit file for the animated plot.
 
         Returns: None
             Displays a matplotlib plot or saves an animated GIF showing the estimation process.
@@ -280,12 +328,12 @@ class PiEstimator(object):
         plt.legend()
         plt.xlim((-0.04*self.n_samples, 1.04*self.n_samples))
         plt.ylim((self.pi.min() - 0.5, self.pi.max() + 0.5))
-        plt.show();
+        plt.show()
 
         if save_as_animation:
             fig, ax = plt.subplots(figsize=(8,5))
             fig.suptitle(f'Estimated $\\pi$ vs. number of samples in {self.n_dimensions}-d')
-            est_plot, = ax.plot(np.linspace(1,1,1),self.pi[:1])
+            est_plot = ax.plot(np.linspace(1,1,1),self.pi[:1])
             ax.hlines(y=np.pi, xmin=1, xmax=self.n_samples, linestyles= '--', colors = 'black', label = r'Real $\pi$')
             ax.set_xlabel('Number of samples')
             ax.set_ylabel(r'Estimated $\pi$')
@@ -293,17 +341,16 @@ class PiEstimator(object):
             ax.set_ylim((self.pi.min() - 0.5, self.pi.max() + 0.5))
             ax.legend()
 
-            frm = [i for i in range(1,50)]
-            frm = frm + [i for i in range(50,self.n_samples, 25)]
+            frm = self._frames()
 
-            ani = animation.FuncAnimation(fig, self._animate_estimate, frames=frm, fargs=(est_plot, self.pi), repeat=False)
+            ani = animation.FuncAnimation(fig, self._animate_estimate, frames=frm, fargs=(est_plot), repeat=False)
 
             writer = animation.PillowWriter(fps=int(250/15.))
-            ani.save('EstimationPi.gif', writer=writer)
+            ani.save(file_name, writer=writer)
             plt.close()
 
 
-    def animate_sampling(self):
+    def animate_sampling(self, file_name = 'MonteCarloPi.gif'):
         """
         Animate the Monte Carlo sampling process used to estimate Pi in 2D space.
 
@@ -316,6 +363,10 @@ class PiEstimator(object):
         with a shaded region indicating the 95% confidence interval.
 
         The animation demonstrates how the Pi estimate stabilizes as the number of samples increases.
+
+        Keyword arguments:
+            file_name (str, default = 'MonteCarloPi.gif'):
+                The name of the exit file for the animated plot.
 
         Returns: None
             Saves an animated GIF named 'MonteCarloPi.gif'.
@@ -344,11 +395,12 @@ class PiEstimator(object):
             ax1 = fig.add_subplot(gs[0, 0])  # top-left
             ax1.set_aspect('equal')  # force square
                 
+            # 1st frame
             scatter = sns.scatterplot(x = self.samples[:1,0], y = self.samples[:1,1], 
                             hue = self.samples[:1,2], style = self.samples[:1,2], 
                             color = ['green', 'red'], legend = False, 
                             palette = {True: 'green', False: 'red'}, 
-                            markers = {True: 'o', False: 'X'}, s = 35, 
+                            markers = {True: 'o', False: 'o'}, s = 20, 
                             linewidth=0.1, ax = ax1
                         )
             ax1.set_xlim((-1.,1))
@@ -373,8 +425,7 @@ class PiEstimator(object):
                 
             plt.tight_layout()
 
-            frm = [i for i in range(2,50)]
-            frm = frm + [i for i in range(50,self.n_samples, 25)]
+            frm = self._frames()
 
             ani = animation.FuncAnimation(
                 fig, 
@@ -385,7 +436,7 @@ class PiEstimator(object):
                 )
 
             writer = animation.PillowWriter(fps=int(250/30.))
-            ani.save('MonteCarloPi.gif', writer=writer)
+            ani.save(file_name, writer=writer)
             plt.close()
 
         else:
