@@ -41,7 +41,7 @@ Description of the `pi_estimator` module architecture.
   - has the following methods:
     - `estimate` performes the estimation,
     - `plot_estimation` plots the estimation versus the number of samples,
-    - `animate_sampling` animates the sampling,
+    - `animate_sampling` animates the sampling (only available for 2-d simulations),
     - `results` returns the final estimation and the confidence interval at 95% confidence level.
 
 ## 5 - The Monte Carlo method
@@ -62,6 +62,13 @@ $$
 
 ## 6 - Results
 
-![plot](https://github.com/wcclima/pi-estimator/blob/main/pictures/EstimationPi.gif)
+ - **2-d Simulation**
+
+
+- **3-d Simulation**
+
 
 ## 7 - Bibliography
+
+1. N. J. Giordano and H Nakanishi, *Computational Physics* (Pearson Prentice Hall, New Jersey, 2006).
+2. R.H. Landau, M.J. Páez and C.C. Bordeianu, *Computation Physics: Problem Solving with Python* (Wiley-VCH, Weinheim, 2015).
