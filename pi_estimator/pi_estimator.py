@@ -248,7 +248,7 @@ class PiEstimator(object):
             f = 2.**self.n_dimensions*factorial(k)
             self.pi = (f*self.samples[:,self.n_dimensions].cumsum()/np.ones(self.n_samples).cumsum())**(1/k)    
 
-        self.error = erfinv(0.95)/np.sqrt(2.*np.ones(n_samples).cumsum())
+        self.error = erfinv(0.95)/np.sqrt(4.*np.ones(n_samples).cumsum())
 
 
     def results(self):
