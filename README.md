@@ -42,7 +42,9 @@ Description of the `pi_estimator` module architecture.
     - `estimate` performes the estimation,
     - `plot_estimation` plots the estimation versus the number of samples,
     - `animate_sampling` animates the sampling (only available for 2-d simulations),
-    - `results` returns the final estimation and the confidence interval at 95% confidence level.
+    - `results` returns the number of dimensions and samples used, the final estimation and the confidence interval at 95% confidence level.
+   
+  Note: the confidence interval is computed using the maximum of the Bernoulli's distribution variance (i.e. $\sigma = 1/2$, the "pessimistic approach"). Thus, the sample error is simply given by $1.96/(2\times \sqrt{N_{\rm samples}})$.
 
 ## 5 - The Monte Carlo method
 
@@ -64,18 +66,22 @@ $$
 
 ## 6 - Results
 
-Here we present estimations of $\pi$ in 2- and 3-dimensional spaces, so we can compare the convergence of the estimative.
+Here we present estimations of $\pi$ in 2- and 10-dimensional spaces, so we can compare the convergence of the estimative.
+
+It is clear from Figures 1 and 3 that the convergence is better in lower dimensions. The reason is the so-called "curse of dimensionality": the fact that as the number of dimensions increase, the volume of the n-sphere inscribed in the n-cube lowers with respect to the volume total volume of the n-cube. Hence we need to throw more darts to be able sample the the n-sphere with the same accuracy as the number of dimensions increases.
 
  - **2-d Simulation**
 
 <div align="center">
   
-|       quantity      |     value      |
-|:-------------------:|:--------------:|
-|      dimension      |       2        |
-|       samples       |      6000      |
-|          π          |     3.132      |
-| conf. interval @95% | [3.119, 3.145] |
+|       quantity      |      value       |
+|:-------------------:|:----------------:|
+|      dimension      |        2         |
+|       samples       |       6000       |
+|          π          |      3.1493      |
+| conf. interval @95% | [3.1404, 3.1583] |
+
+*Table 1: Results in 2 dimensions.*
 
 </div>
 <br><br>
@@ -98,16 +104,18 @@ Here we present estimations of $\pi$ in 2- and 3-dimensional spaces, so we can c
 <br><br>
 
 
-- **3-d Simulation**
+- **10-d Simulation**
 
 <div align="center">
   
-|       quantity      |     value     |
-|:-------------------:|:-------------:|
-|      dimension      |       3       |
-|       samples       |      6000     |
-|          π          |     3.123     |
-| conf. interval @95% | [3.11, 3.136] |
+|       quantity      |      value      |
+|:-------------------:|:---------------:|
+|      dimension      |        10       |
+|       samples       |       6000      |
+|          π          |      2.9549     |
+| conf. interval @95% | [2.946, 2.9639] |
+
+*Table 2: Results in 10 dimensions.*
 
 </div>
 <br><br>
@@ -115,9 +123,9 @@ Here we present estimations of $\pi$ in 2- and 3-dimensional spaces, so we can c
 
 <div align="center">
   
-![plot](https://github.com/wcclima/pi-estimator/blob/main/pictures/EstimationPi3D.gif)
+![plot](https://github.com/wcclima/pi-estimator/blob/main/pictures/EstimationPi10D.gif)
   
-*Figure 3: Estimative for Pi in 3-d using a total of 6000 samples.*
+*Figure 3: Estimative for Pi in 10-d using a total of 6000 samples.*
 
 </div>
 <br><br>
