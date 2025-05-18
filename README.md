@@ -101,7 +101,7 @@ It is clear from Figures 1 and 3 that the convergence is better in lower dimensi
 ![plot](https://github.com/wcclima/pi-estimator/blob/main/pictures/MonteCarloPi2D.gif)
 <div align="center">
   
-*Figure 2: (On the left) Sampling of points within a square of side 2 with a inscribe circle of radius 1. Points in red are outside the circle, while the ones in gree are inside. We see that the overwheling majority of points miss the 10-sphere. (On the right) Normal distribution for the estimate and the corresponding confidence interval at 95% confidence level.*
+*Figure 2: (On the left) Sampling of points within a square of side 2 with a inscribe circle of radius 1. Points in red are outside the circle, while the ones in gree are inside. (On the right) Normal distribution for the estimate and the corresponding confidence interval at 95% confidence level.*
 
 </div>
 <br><br>
@@ -138,7 +138,7 @@ It is clear from Figures 1 and 3 that the convergence is better in lower dimensi
   
 ![plot](https://github.com/wcclima/pi-estimator/blob/main/pictures/MonteCarloPi10D.gif)
   
-*Figure 4: (On the left) 2-d projection of the sampling of points on a plane and of the parallel great circle. Points in red are outside the 10-sphere, while the ones in gree are inside. (On the right) Normal distribution for the estimate and the corresponding confidence interval at 95% confidence level.*
+*Figure 4: (On the left) 2-d projection of the sampling of points on a plane and of the parallel great circle. Points in red are outside the 10-sphere, while the ones in gree are inside. We see that the overwheling majority of points miss the 10-sphere. (On the right) Normal distribution for the estimate and the corresponding confidence interval at 95% confidence level.*
 
 </div>
 <br><br>
