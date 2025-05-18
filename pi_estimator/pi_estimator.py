@@ -8,6 +8,7 @@ from scipy.stats import norm
 from math import factorial
 from prettytable import PrettyTable
 
+
 __all__ = ["PiEstimator"]
 
 class PiEstimator(object):
@@ -31,6 +32,11 @@ class PiEstimator(object):
         error (np.ndarray): array of shape (n_samples,).
             The confidence interval @ 95% confidence level
             at each draw.
+        
+        samples (np.ndarray): array of shape (n_samples, n_dimensions + 1).
+            It stores the x_1, ..., x_n_dim coordinates of the sample points in
+            the first n_dimensions columns. The last column is a bool leable 
+            where True means the point is inside the n-sphere.
 
             
     Methods:
@@ -63,6 +69,7 @@ class PiEstimator(object):
         self.n_samples = None
         self.pi = None
         self.error = None
+        self.samples = None
 
 
     def _1st2_sign_figs(self, number):
@@ -107,7 +114,7 @@ class PiEstimator(object):
         plot.set_data(np.linspace(1, frame, frame), self.pi[:frame])
 
     
-    def _animate_sampling(self, frame, suptitle, x, ax, dist_plot, scatter_plot, shade_plot):
+    def _animate_sampling(self, frame, suptitle, x, ax, data, dist_plot, scatter_plot, shade_plot):
         """
         Animation update function for visualizing sampling and distribution estimation.
 
@@ -143,11 +150,11 @@ class PiEstimator(object):
         """
 
         suptitle.set_text(f"{frame} throws")
-        scatter_plot = sns.scatterplot(x = self.samples[:frame,0], y = self.samples[:frame,1], 
-                        hue = self.samples[:frame,2], style = self.samples[:frame,2], 
+        scatter_plot = sns.scatterplot(x = data[:frame,0], y = data[:frame,1], 
+                        hue = data[:frame,2], style = data[:frame,2], 
                         color = ['green', 'red'], legend = False, 
                         palette = {True: 'green', False: 'red'}, 
-                        markers = {True: 'o', False: 'o'}, s = 20, 
+                        markers = {True: 'o', False: 'o'}, s = 8, 
                         linewidth=0.1, ax = ax
                     )
         
@@ -206,8 +213,38 @@ class PiEstimator(object):
             frame_list += [i for i in range(10000, self.n_samples, 100)]
 
         return frame_list
+    
 
+    def _random_projection(self, seed=42):
+        """
+        Projects high-dimensional data with labels to 2D using a random linear projection.
 
+        Keyword arguments:
+            points_with_label: np.ndarray of shape (n_samples, n_dimensions + 1)
+                The last column is a boolean indicating whether the point is inside the n-sphere.
+
+        Returns:
+            proj_points: np.ndarray of shape (n_samples, 3)
+        """
+        np.random.seed(seed)
+        points = self.samples[:, :self.n_dimensions]
+        labels = self.samples[:, -1]
+
+        # Create a random projection matrix: shape (n_dims, 2)
+        random_matrix = np.random.randn(self.n_dimensions, 2)
+        random_matrix /= np.linalg.norm(random_matrix, axis=0)  # normalize columns
+
+        v0, v1 = random_matrix[:,0].reshape(1, -1), random_matrix[:,1].reshape(1, -1)
+        cos_gamma = (v0*v1).sum()
+        v1 = (v1 - cos_gamma*v0)/np.sqrt(1 - cos_gamma**2)
+        random_matrix[:, 1] = v1        
+
+        # Project to 2D
+        proj_points = points @ random_matrix
+
+        proj_points = np.hstack((proj_points, labels.reshape(-1,1)))
+
+        return proj_points
 
 
     def estimate(self, n_samples, n_dimensions = 2):
@@ -282,6 +319,7 @@ class PiEstimator(object):
         estimation_table = PrettyTable(["quantity", "value"])
         estimation_table.add_row(["dimension", self.n_dimensions])
         estimation_table.add_row(["samples", self.n_samples])
+        estimation_table.add_row([f"samples in {self.n_dimensions}-sphere", int(self.samples[:,self.n_dimensions].sum())])
         estimation_table.add_row(["π", np.round(self.pi[-1], sig_figs)])
         estimation_table.add_row(["conf. interval @95%", f'[{np.round(self.pi[-1] - self.error[-1], sig_figs)}, {np.round(self.pi[-1] + self.error[-1], sig_figs)}]'])
 
@@ -380,64 +418,68 @@ class PiEstimator(object):
         error_message = "Estimation has not been performed. Please call `estimate` before `animate_sampling`."
         if self.pi is None or self.error is None:
             raise ValueError(error_message)
+        
 
         if self.n_dimensions == 2:
-
-            theta = np.linspace(0.,2.*np.pi,100)
-            x = np.linspace(0.,4., 400)
-                
-            fig = plt.figure(figsize=(12, 3.6))  # total figure size
-            gs = gridspec.GridSpec(1, 2, width_ratios=[1, 2])  # custom ratios
-
-            suptitle = fig.suptitle("1 throw", fontsize=16)
-
-            # Make a square plot (1x1 block)
-            ax1 = fig.add_subplot(gs[0, 0])  # top-left
-            ax1.set_aspect('equal')  # force square
-                
-            # 1st frame
-            scatter = sns.scatterplot(x = self.samples[:1,0], y = self.samples[:1,1], 
-                            hue = self.samples[:1,2], style = self.samples[:1,2], 
-                            color = ['green', 'red'], legend = False, 
-                            palette = {True: 'green', False: 'red'}, 
-                            markers = {True: 'o', False: 'o'}, s = 20, 
-                            linewidth=0.1, ax = ax1
-                        )
-            ax1.set_xlim((-1.,1))
-            ax1.set_ylim((-1.,1))
-            ax1.set_xticks([-1., 0., 1.])
-            ax1.set_yticks([-1., 0., 1.])
-            ax1.set_xlabel('Samples')
-            ax1.plot(np.sin(theta), np.cos(theta), color='black')
-                
-            # Make a rectangular plot (2x1 block)
-            ax2 = fig.add_subplot(gs[:, 1])  # right column (span rows)
-                
-            dist_plot, = ax2.plot(x, norm.pdf(x,self.pi[1],1/np.sqrt(4))/np.sqrt(4))
-            ax2.vlines(x=np.pi, ymin=0., ymax=.5,linestyles='--', colors = 'black', label = r'Real $\pi$')
-            shade_plot = ax2.axvspan(self.pi[1] - self.error[1], self.pi[1] + self.error[1], alpha=0.2, facecolor='red', label = '95% Confidence Level')
-            ax2.set_xlim((0.,4.))
-            ax2.set_ylim(0.,0.5)
-            ax2.set_xticks([0., 1., 2., 3., 4.])
-            ax2.set_yticks([])
-            ax2.set_xlabel(r'Estimated $\pi$')
-            ax2.legend(loc='upper left')
-                
-            plt.tight_layout()
-
-            frm = self._frames()
-
-            ani = animation.FuncAnimation(
-                fig, 
-                self._animate_sampling, 
-                frames=frm, 
-                fargs=(suptitle, x, ax1, dist_plot, scatter, shade_plot), 
-                repeat=False
-                )
-
-            writer = animation.PillowWriter(fps=int(250/30.))
-            ani.save(file_name, writer=writer)
-            plt.close()
+            sample_points = self.samples
 
         else:
-            print('The method only animates the 2-dimensional case.')
+            sample_points = self._random_projection()
+
+
+        x = np.linspace(0.,4., 400)
+        theta = np.linspace(0.,2.*np.pi,100).reshape(-1,1)
+        circle = np.hstack((np.cos(theta), np.sin(theta)))
+                
+        fig = plt.figure(figsize=(12, 3.6))  # total figure size
+        gs = gridspec.GridSpec(1, 2, width_ratios=[1, 2])  # custom ratios
+
+        suptitle = fig.suptitle("1 throw", fontsize=16)
+
+        # Make a square plot (1x1 block)
+        ax1 = fig.add_subplot(gs[0, 0])  # top-left
+        ax1.set_aspect('equal')  # force square
+                
+        # 1st frame
+        scatter = sns.scatterplot(x = sample_points[:1,0], y = sample_points[:1,1], 
+                        hue = sample_points[:1,2], style = sample_points[:1,2], 
+                        color = ['green', 'red'], legend = False, 
+                        palette = {True: 'green', False: 'red'}, 
+                        markers = {True: 'o', False: 'o'}, s = 8, 
+                        linewidth=0.1, ax = ax1
+                    )
+        ax1.set_xlim((-1.,1))
+        ax1.set_ylim((-1.,1))
+        ax1.set_xticks([-1., 0., 1.])
+        ax1.set_yticks([-1., 0., 1.])
+        ax1.set_xlabel('Samples')
+        ax1.plot(circle[:,0], circle[:, 1], color='black')
+                
+        # Make a rectangular plot (2x1 block)
+        ax2 = fig.add_subplot(gs[:, 1])  # right column (span rows)
+                
+        dist_plot, = ax2.plot(x, norm.pdf(x,self.pi[1],1/np.sqrt(4))/np.sqrt(4))
+        ax2.vlines(x=np.pi, ymin=0., ymax=.5,linestyles='--', colors = 'black', label = r'Real $\pi$')
+        shade_plot = ax2.axvspan(self.pi[1] - self.error[1], self.pi[1] + self.error[1], alpha=0.2, facecolor='red', label = '95% Confidence Level')
+        ax2.set_xlim((0.,4.))
+        ax2.set_ylim(0.,0.5)
+        ax2.set_xticks([0., 1., 2., 3., 4.])
+        ax2.set_yticks([])
+        ax2.set_xlabel(r'Estimated $\pi$')
+        ax2.legend(loc='upper left')
+                
+        plt.tight_layout()
+
+        frm = self._frames()
+
+        ani = animation.FuncAnimation(
+            fig, 
+            self._animate_sampling, 
+            frames=frm, 
+            fargs=(suptitle, x, ax1, sample_points, dist_plot, scatter, shade_plot), 
+            repeat=False
+            )
+
+        writer = animation.PillowWriter(fps=int(250/30.))
+        ani.save(file_name, writer=writer)
+        plt.close()
